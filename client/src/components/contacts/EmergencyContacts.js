@@ -16,7 +16,8 @@ import {
   DialogActions,
   TextField,
   CircularProgress,
-  MenuItem
+  MenuItem,
+  Alert
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -25,8 +26,9 @@ import {
   Phone as PhoneIcon
 } from '@mui/icons-material';
 import { useContacts } from '../../hooks/useContacts';
+import { useAuth } from '../../contexts/AuthContext';
 
-const EmergencyContacts = ({ user }) => {
+const EmergencyContacts = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingContact, setEditingContact] = useState(null);
   const [formData, setFormData] = useState({
@@ -35,27 +37,50 @@ const EmergencyContacts = ({ user }) => {
     relation: '',
     notificationPreference: 'all'
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
+  const { currentUser } = useAuth();
   const {
     contacts,
-    loading,
-    error,
+    loading: contactsLoading,
+    error: contactsError,
     addContact,
     removeContact,
-    updateContact
-  } = useContacts(user?.uid);
+    updateContact,
+    refreshContacts
+  } = useContacts();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      if (!currentUser?.uid) {
+        throw new Error('User not authenticated');
+      }
+
+      setLoading(true);
+
       if (editingContact) {
         await updateContact(editingContact.id, formData);
       } else {
-        await addContact(formData);
+        await addContact({
+          ...formData,
+          userId: currentUser.uid,
+          timestamp: new Date()
+        });
       }
+      
+      setSuccess('Contact saved successfully');
+      
       handleCloseDialog();
+      
+      await refreshContacts();
     } catch (err) {
+      setError(err.message);
       console.error('Error saving contact:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -115,7 +140,11 @@ const EmergencyContacts = ({ user }) => {
             <CircularProgress />
           </Box>
         ) : error ? (
-          <Typography color="error">{error}</Typography>
+          <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+        ) : contacts.length === 0 ? (
+          <Typography color="textSecondary" sx={{ p: 2, textAlign: 'center' }}>
+            No emergency contacts added yet
+          </Typography>
         ) : (
           <List>
             {contacts.map((contact) => (
@@ -204,8 +233,13 @@ const EmergencyContacts = ({ user }) => {
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseDialog}>Cancel</Button>
-              <Button type="submit" variant="contained" color="primary">
-                {editingContact ? 'Save Changes' : 'Add Contact'}
+              <Button 
+                type="submit" 
+                variant="contained" 
+                color="primary"
+                disabled={loading}
+              >
+                {loading ? <CircularProgress size={24} /> : (editingContact ? 'Save Changes' : 'Add Contact')}
               </Button>
             </DialogActions>
           </form>

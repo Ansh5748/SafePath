@@ -10,7 +10,18 @@ import {
 class ContactsService {
   async addContact(userId, contactData) {
     try {
+      if (!userId) {
+        throw new Error('User ID is required');
+      }
+
       const userRef = doc(db, 'users', userId);
+      
+      // Verify user exists
+      const userDoc = await getDoc(userRef);
+      if (!userDoc.exists()) {
+        throw new Error('User not found');
+      }
+
       await updateDoc(userRef, {
         emergencyContacts: arrayUnion({
           ...contactData,
@@ -18,9 +29,11 @@ class ContactsService {
           addedAt: new Date()
         })
       });
+
+      return true;
     } catch (error) {
       console.error('Error adding contact:', error);
-      throw error;
+      throw new Error(error.message || 'Failed to add contact');
     }
   }
 

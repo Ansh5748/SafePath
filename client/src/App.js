@@ -9,6 +9,7 @@ import { ThemeProvider } from '@mui/material';
 import { theme } from './theme';
 import './styles/global.css';
 import { validateOpenCageKey, validateWeatherKey } from './utils/apiKeyValidator';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 function App() {
   useEffect(() => {
@@ -31,11 +32,20 @@ function App() {
     <ThemeProvider theme={theme}>
       <AuthProvider>
         <Router>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/login" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route 
+                path="/" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="/login" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
+            </Routes>
+          </ErrorBoundary>
         </Router>
       </AuthProvider>
     </ThemeProvider>
