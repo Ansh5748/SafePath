@@ -51,6 +51,12 @@ const SafetyMap = ({ user }) => {
     return '#F44336'; // Red
   };
 
+  // Add error handling for API key issues
+  const handleMapError = (error) => {
+    console.error('Google Maps Error:', error);
+    // Show fallback UI or error message
+  };
+
   return (
     <Card>
       <CardContent>
@@ -62,6 +68,10 @@ const SafetyMap = ({ user }) => {
             mapContainerStyle={mapContainerStyle}
             center={mapCenter}
             zoom={15}
+            onLoad={map => {
+              // Map loaded successfully
+            }}
+            onError={handleMapError}
           >
             {/* User's current location */}
             {currentLocation && (

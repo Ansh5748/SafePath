@@ -8,7 +8,7 @@
 ## Setup Steps
 
 1. Clone the repository:
-git clone https://github.com/your-username/safepath-ai.git
+git clone https://github.com/Ansh5748/safepath-ai.git
 cd safepath-ai
 
 2. Install dependencies:
