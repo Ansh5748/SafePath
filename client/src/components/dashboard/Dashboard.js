@@ -18,14 +18,14 @@ const Dashboard = () => {
           {/* Emergency Button */}
           <Grid item xs={12} md={4}>
             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-              <EmergencyPanel user={currentUser} />
+              <EmergencyPanel />
             </Paper>
           </Grid>
 
           {/* Map */}
           <Grid item xs={12} md={8}>
             <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-              <SafetyMap user={currentUser} />
+              <SafetyMap />
             </Paper>
           </Grid>
 
@@ -39,7 +39,7 @@ const Dashboard = () => {
           {/* Emergency Contacts */}
           <Grid item xs={12}>
             <Paper sx={{ p: 2 }}>
-              <EmergencyContacts user={currentUser} />
+              <EmergencyContacts />
             </Paper>
           </Grid>
         </Grid>

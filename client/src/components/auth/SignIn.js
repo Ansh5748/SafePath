@@ -9,7 +9,7 @@ import {
   Alert
 } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
@@ -17,16 +17,24 @@ const SignIn = () => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setError('');
+      setLoading(true);
       await signIn(formData.email, formData.password);
-      navigate('/');
+      // Redirect to the page they tried to visit or to dashboard
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
     } catch (err) {
       setError('Failed to sign in. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,8 +82,9 @@ const SignIn = () => {
               variant="contained"
               fullWidth
               sx={{ mt: 3 }}
+              disabled={loading}
             >
-              Sign In
+              {loading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
 

@@ -1,16 +1,18 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import LoadingAnimation from '../common/LoadingAnimation';
 
 const ProtectedRoute = ({ children }) => {
   const { currentUser, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingAnimation message="Loading..." />;
   }
 
   if (!currentUser) {
-    return <Navigate to="/signin" />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return children;

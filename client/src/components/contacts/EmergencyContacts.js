@@ -55,29 +55,22 @@ const EmergencyContacts = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (!currentUser?.uid) {
-        throw new Error('User not authenticated');
-      }
-
       setLoading(true);
-
+      
       if (editingContact) {
         await updateContact(editingContact.id, formData);
       } else {
         await addContact({
           ...formData,
-          userId: currentUser.uid,
           timestamp: new Date()
         });
       }
       
       setSuccess('Contact saved successfully');
-      
       handleCloseDialog();
-      
       await refreshContacts();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Error saving contact');
       console.error('Error saving contact:', err);
     } finally {
       setLoading(false);

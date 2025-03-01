@@ -3,6 +3,7 @@ import { auth, db } from '../../config/firebase.config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { TextField, Button, Box, Typography, Alert } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -13,9 +14,12 @@ const SignUp = () => {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
@@ -23,6 +27,7 @@ const SignUp = () => {
     }
 
     try {
+      setLoading(true);
       const userCredential = await createUserWithEmailAndPassword(
         auth, 
         formData.email, 
@@ -42,10 +47,31 @@ const SignUp = () => {
           autoRecordEnabled: false,
           geofencingRadius: 100,
           notificationsEnabled: true
-        }
+        },
+        createdAt: new Date()
       });
+
+      navigate('/');
     } catch (err) {
-      setError(err.message);
+      console.error('Signup error:', err);
+      switch (err.code) {
+        case 'auth/email-already-in-use':
+          setError('Email already exists');
+          break;
+        case 'auth/invalid-email':
+          setError('Invalid email address');
+          break;
+        case 'auth/operation-not-allowed':
+          setError('Email/password accounts are not enabled. Please contact support.');
+          break;
+        case 'auth/weak-password':
+          setError('Password is too weak');
+          break;
+        default:
+          setError(err.message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,6 +129,7 @@ const SignUp = () => {
         fullWidth
         variant="contained"
         sx={{ mt: 3, mb: 2 }}
+        disabled={loading}
       >
         Sign Up
       </Button>
